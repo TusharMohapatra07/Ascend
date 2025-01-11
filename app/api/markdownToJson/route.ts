@@ -22,7 +22,6 @@ export async function POST(request: Request){
           const data = rows.slice(3).map(row => {
             const obj = {};
             headers.forEach((header, index) => {
-            // @ts-expect-error nothing to see here
               obj[header] = row[index + 3]; // Skip first empty column
             });
             return obj;
