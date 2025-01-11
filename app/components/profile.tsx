@@ -1,94 +1,85 @@
 'use client';
 import { motion } from 'framer-motion';
-import { LocationOn, Email, Link as LinkIcon, KeyboardArrowDown, People, GitHub, Language } from '@mui/icons-material';
+import { LocationOn, Email, Link as LinkIcon, People, GitHub, Language } from '@mui/icons-material';
 
 export default function Profile() {
     return (
         <motion.aside 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="w-full max-w-[296px] space-y-6"
+            className="w-full max-w-[296px] space-y-4"
         >
             <motion.div 
                 className="relative group"
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
-                <div className="w-[296px] h-[296px] rounded-full ring-2 ring-border transition-all duration-200 group-hover:ring-accent/50 bg-gray-300 flex items-center justify-center">
-                    <People className="w-32 h-32 text-white" />
+                <div className="w-[296px] h-[296px] rounded-full border border-gray-300 dark:border-gray-700">
+                    <People className="w-full h-full p-16 text-gray-400" />
                 </div>
-                <div className="absolute inset-0 rounded-full bg-accent/0 group-hover:bg-accent/5 transition-colors duration-200" />
             </motion.div>
 
             <div className="space-y-1">
-                <h1 className="text-2xl font-bold">John Doe</h1>
-                <p className="text-muted-foreground">@johndoe</p>
+                <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">John Doe</h1>
+                <p className="text-xl font-light text-gray-600 dark:text-gray-400">@johndoe</p>
             </div>
 
-            <motion.div 
-                className="space-y-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-            >
-                <p className="text-sm text-muted-foreground">Full-stack developer passionate about open source</p>
+            <div className="space-y-3">
+                <p className="text-base text-gray-600 dark:text-gray-300">Full-stack developer passionate about open source</p>
                 
-                <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <LocationOn className="w-4 h-4" />
+                <button className="w-full py-1 px-3 text-sm font-semibold border border-gray-300 dark:border-gray-700 rounded-md bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white transition-colors">
+                    Follow
+                </button>
+
+                <div className="flex flex-col gap-2 text-gray-600 dark:text-gray-400">
+                    <div className="flex items-center gap-2 text-sm">
+                        <LocationOn fontSize="small" />
                         <span>San Francisco, CA</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Email className="w-4 h-4" />
-                        <a href="mailto:johndoe@example.com" className="hover:underline">johndoe@example.com</a>
+                    <div className="flex items-center gap-2 text-sm">
+                        <Email fontSize="small" />
+                        <a href="mailto:johndoe@example.com" className="text-blue-600 dark:text-blue-400 hover:underline">johndoe@example.com</a>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <LinkIcon className="w-4 h-4" />
-                        <a href="https://johndoe.com" className="hover:underline">johndoe.com</a>
+                    <div className="flex items-center gap-2 text-sm">
+                        <LinkIcon fontSize="small" />
+                        <a href="https://johndoe.com" className="text-blue-600 dark:text-blue-400 hover:underline">johndoe.com</a>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <People className="w-4 h-4" />
-                        <span>1.5k followers · 234 following</span>
+                    <div className="flex items-center gap-2 text-sm">
+                        <People fontSize="small" />
+                        <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400">
+                            <span className="font-semibold">1.5k</span> followers
+                        </a>
+                        <span>·</span>
+                        <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400">
+                            <span className="font-semibold">234</span> following
+                        </a>
                     </div>
                 </div>
+            </div>
 
-                <div className="flex gap-2">
-                    <button className="button-primary flex-1">Follow</button>
-                    <button className="button-secondary">
-                        <KeyboardArrowDown className="w-4 h-4" />
-                    </button>
-                </div>
-            </motion.div>
-
-            <motion.div 
-                className="space-y-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-            >
-                <h2 className="font-semibold text-lg">Highlights</h2>
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                <h2 className="mb-2 text-base font-semibold text-gray-900 dark:text-white">Achievements</h2>
                 <div className="flex flex-wrap gap-2">
-                    <span className="px-2 py-1 text-xs font-medium bg-secondary text-secondary-foreground rounded-full">
+                    <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400">
                         Arctic Code Vault Contributor
                     </span>
-                    <span className="px-2 py-1 text-xs font-medium bg-secondary text-secondary-foreground rounded-full">
+                    <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400">
                         GitHub Star
                     </span>
                 </div>
-            </motion.div>
+            </div>
 
-            <motion.div 
-                className="space-y-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-            >
-                <h2 className="font-semibold text-lg">Organizations</h2>
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                <h2 className="mb-2 text-base font-semibold text-gray-900 dark:text-white">Organizations</h2>
                 <div className="flex flex-wrap gap-2">
-                    <GitHub className="w-8 h-8 text-gray-700" />
-                    <Language className="w-8 h-8 text-gray-700" />
+                    <a href="#" className="hover:opacity-75 transition-opacity">
+                        <GitHub className="w-8 h-8 text-gray-600 dark:text-gray-400" />
+                    </a>
+                    <a href="#" className="hover:opacity-75 transition-opacity">
+                        <Language className="w-8 h-8 text-gray-600 dark:text-gray-400" />
+                    </a>
                 </div>
-            </motion.div>
+            </div>
         </motion.aside>
     );
 }
