@@ -1,6 +1,5 @@
 'use client';
-import { motion } from 'framer-motion';
-import { Commit, PullRequest, Code, BugReport } from '@mui/icons-material';
+import { Commit } from '@mui/icons-material';
 
 const activities = [
   {
@@ -15,33 +14,28 @@ const activities = [
 
 export default function ActivityFeed() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="mt-8 repository-card"
-    >
-      <h2 className="text-lg font-semibold mb-4">Recent Activity</h2>
-      <div className="space-y-4">
+    <div className="mt-4">
+      <h2 className="text-base mb-3 font-semibold text-white">Recent Activity</h2>
+      <div className="border border-gray-800 rounded-md bg-black/40">
         {activities.map((activity, index) => (
-          <motion.div
+          <div
             key={index}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="flex items-start gap-3 p-3 rounded-md hover:bg-muted transition-colors"
+            className="flex items-start gap-3 p-4 border-b border-gray-800 last:border-b-0 hover:bg-gray-900/50"
           >
-            <activity.icon className="w-5 h-5 text-accent mt-1" />
-            <div className="flex-1">
-              <p className="text-sm">
-                <span className="text-accent hover:underline cursor-pointer">johndoe</span>
-                {' '}{activity.message}{' '}
-                <span className="text-accent hover:underline cursor-pointer">{activity.repo}</span>
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">{activity.time}</p>
+            <div className="mt-1">
+              <activity.icon className="w-4 h-4 text-gray-300" />
             </div>
-          </motion.div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[14px] text-gray-100 leading-[1.5]">
+                <a href="#" className="text-blue-400 hover:underline font-semibold">johndoe</a>
+                {' '}{activity.message}{' '}
+                <a href="#" className="text-blue-400 hover:underline">{activity.repo}</a>
+              </p>
+              <p className="text-[12px] text-gray-400 mt-0.5">{activity.time}</p>
+            </div>
+          </div>
         ))}
       </div>
-    </motion.div>
+    </div>
   );
 }
