@@ -1,4 +1,4 @@
-import { StarIcon, GitForkIcon } from 'lucide-react';
+import { Star, ForkRight } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 
 interface RepositoryCardProps {
@@ -37,7 +37,7 @@ export default function RepositoryCard({
           )}
         </div>
         <button className="button-secondary flex items-center gap-1">
-          <StarIcon className="w-4 h-4" />
+          <Star className="w-4 h-4" />
           Star
         </button>
       </div>
@@ -54,13 +54,13 @@ export default function RepositoryCard({
         )}
         {stars > 0 && (
           <a href="#" className="flex items-center gap-1 hover:text-foreground">
-            <StarIcon className="w-4 h-4" />
+            <Star className="w-4 h-4" />
             {stars}
           </a>
         )}
         {forks > 0 && (
           <a href="#" className="flex items-center gap-1 hover:text-foreground">
-            <GitForkIcon className="w-4 h-4" />
+            <ForkRight className="w-4 h-4" />
             {forks}
           </a>
         )}

@@ -1,5 +1,5 @@
 'use client';
-import { Moon, Sun } from 'lucide-react';
+import { DarkMode, LightMode, Person, Search } from '@mui/icons-material';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
@@ -31,7 +31,10 @@ export default function Header({ activeTab, onTabChange }: HeaderProps) {
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className="p-2 rounded-md hover:bg-muted/50 transition-colors duration-200"
             >
-              {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {theme === "dark" ? 
+                <LightMode className="w-5 h-5" /> : 
+                <DarkMode className="w-5 h-5" />
+              }
             </button>
             <Image
               src="/137442734.jpeg"

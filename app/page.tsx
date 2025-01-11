@@ -17,8 +17,9 @@ export default function Home() {
         <div className="flex flex-col md:flex-row gap-8">
           <Profile />
           <div className="flex-1">
+          <ContributionsGraph />
             <MainContent activeTab={activeTab} />
-            <ContributionsGraph />
+            
             <ActivityFeed />
           </div>
         </div>

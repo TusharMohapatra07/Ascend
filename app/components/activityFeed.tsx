@@ -1,11 +1,11 @@
 'use client';
 import { motion } from 'framer-motion';
-import { GitCommitIcon} from 'lucide-react';
+import { Commit, PullRequest, Code, BugReport } from '@mui/icons-material';
 
 const activities = [
   {
     type: 'commit',
-    icon: GitCommitIcon,
+    icon: Commit,
     message: 'Committed to main',
     repo: 'example-repo',
     time: '2 days ago'

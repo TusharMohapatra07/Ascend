@@ -1,55 +1,75 @@
-'use client';
-import { motion } from 'framer-motion';
-import RepositoryCard from './repositoryCard';
-import { Search } from 'lucide-react';
-import { useLayoutEffect, useState } from 'react';
+"use client";
+import { motion } from "framer-motion";
+import RepositoryCard from "./repositoryCard";
+import { Search } from "lucide-react";
+import { useLayoutEffect, useState } from "react";
+import ReadmeViewer from './ReadmeViewer';
 
 const MOCK_REPOS = [
   {
-    name: 'react-github-clone',
-    description: 'A GitHub profile clone built with React and Tailwind CSS',
-    language: 'TypeScript',
-    languageColor: '#3178c6',
+    name: "react-github-clone",
+    description: "A GitHub profile clone built with React and Tailwind CSS",
+    language: "TypeScript",
+    languageColor: "#3178c6",
     stars: 128,
     forks: 23,
-    updatedAt: '2 days ago'
+    updatedAt: "2 days ago",
   },
   {
-    name: 'next-js-blog',
-    description: 'A simple blog built with Next.js and MDX',
-    language: 'JavaScript',
-    languageColor: '#f1e05a',
+    name: "next-js-blog",
+    description: "A simple blog built with Next.js and MDX",
+    language: "JavaScript",
+    languageColor: "#f1e05a",
     stars: 89,
     forks: 12,
-    updatedAt: '1 week ago'
+    updatedAt: "1 week ago",
   },
   // Add more mock repositories as needed
 ];
+
+const MOCK_README = `# Project Title
+
+A brief description of what this project does and who it's for
+
+## Features
+
+- Light/dark mode toggle
+- Live previews
+- Fullscreen mode
+- Cross platform
+
+## Installation
+
+\`\`\`bash
+npm install my-project
+cd my-project
+\`\`\`
+`;
 
 interface MainContentProps {
   activeTab: string;
 }
 
 export default function MainContent({ activeTab }: MainContentProps) {
-  const [isClient, setIsClient] = useState(false)
+  const [isClient, setIsClient] = useState(false);
 
   useLayoutEffect(() => {
-    setIsClient(true)
-  }, [])
+    setIsClient(true);
+  }, []);
 
   if (!isClient) {
-    return null
+    return null;
   }
 
   return (
-    <motion.main 
+    <motion.main
       className="flex-1 min-w-0"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 0.2 }}
-    >     
+    >
       <div className="py-4">
-        {activeTab === 'Repositories' && (
+        {activeTab === "Repositories" && (
           <div className="space-y-4">
             <div className="flex gap-4 mb-4">
               <div className="relative flex-1">
@@ -64,17 +84,17 @@ export default function MainContent({ activeTab }: MainContentProps) {
               <button className="button-secondary">Language: All</button>
               <button className="button-secondary">Sort: Last updated</button>
             </div>
-            
-            <motion.div 
+
+            <motion.div
               className="space-y-4"
               variants={{
                 hidden: { opacity: 0 },
                 show: {
                   opacity: 1,
                   transition: {
-                    staggerChildren: 0.1
-                  }
-                }
+                    staggerChildren: 0.1,
+                  },
+                },
               }}
               initial="hidden"
               animate="show"
@@ -84,7 +104,7 @@ export default function MainContent({ activeTab }: MainContentProps) {
                   key={repo.name}
                   variants={{
                     hidden: { opacity: 0, y: 20 },
-                    show: { opacity: 1, y: 0 }
+                    show: { opacity: 1, y: 0 },
                   }}
                 >
                   <RepositoryCard {...repo} />
@@ -93,8 +113,10 @@ export default function MainContent({ activeTab }: MainContentProps) {
             </motion.div>
           </div>
         )}
+        {activeTab === "about" && (
+          <ReadmeViewer content={MOCK_README} />
+        )}
       </div>
     </motion.main>
   );
 }
-
