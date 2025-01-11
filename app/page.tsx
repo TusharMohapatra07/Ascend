@@ -1,14 +1,29 @@
-'use client';
-import { useState } from 'react';
-import Header from './components/header';
-import Profile from './components/profile';
-import MainContent from './components/mainContent';
-import ActivityFeed from './components/activityFeed';
-import ContributionsGraph from './components/contributionsGraph';
-import Footer from './components/footer';
+'use client'
+
+import { useState, useEffect } from "react";
+import Header from "./components/header";
+import Profile from "./components/profile";
+import MainContent from "./components/mainContent";
+import ActivityFeed from "./components/activityFeed";
+import ContributionsGraph from "./components/contributionsGraph";
+import Footer from "./components/footer";
+import { useSession } from "next-auth/react";
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState('Repositories');
+  const [activeTab, setActiveTab] = useState("Repositories");
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/api/auth/login");
+    }
+  }, [status, router]);
+
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -17,9 +32,8 @@ export default function Home() {
         <div className="flex flex-col md:flex-row gap-8">
           <Profile />
           <div className="flex-1">
-          <ContributionsGraph />
+            <ContributionsGraph />
             <MainContent activeTab={activeTab} />
-            
             <ActivityFeed />
           </div>
         </div>
