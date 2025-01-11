@@ -1,8 +1,7 @@
 'use client';
-import { DarkMode, LightMode, Person, Search } from '@mui/icons-material';
+import { DarkMode, LightMode } from '@mui/icons-material';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from "next-themes"
 
@@ -12,7 +11,6 @@ interface HeaderProps {
 }
 
 export default function Header({ activeTab, onTabChange }: HeaderProps) {
-  const [searchFocused, setSearchFocused] = useState(false);
   const { setTheme, theme } = useTheme()
 
   return (
@@ -48,14 +46,14 @@ export default function Header({ activeTab, onTabChange }: HeaderProps) {
 
         <nav className="flex gap-4 px-4 py-2">
           <button
-            onClick={() => onTabChange('projects')}
-            className={`px-4 py-2 rounded-md ${activeTab === 'projects' ? 'bg-primary text-white' : 'text-text hover:bg-muted/50'}`}
+            onClick={() => onTabChange('skills')}
+            className={`px-4 py-2 rounded-md ${activeTab === 'skills' ? 'bg-primary text-white' : 'text-text hover:bg-muted/50'}`}
           >
             Skills
           </button>
           <button
-            onClick={() => onTabChange('about')}
-            className={`px-4 py-2 rounded-md ${activeTab === 'about' ? 'bg-primary text-white' : 'text-text hover:bg-muted/50'}`}
+            onClick={() => onTabChange('overview')}
+            className={`px-4 py-2 rounded-md ${activeTab === 'overview' ? 'bg-primary text-white' : 'text-text hover:bg-muted/50'}`}
           >
             Overview
           </button>

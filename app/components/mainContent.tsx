@@ -47,10 +47,10 @@ cd my-project
 `;
 
 interface MainContentProps {
-  activeTab: string;
+  activeTab?: string;
 }
 
-export default function MainContent({ activeTab }: MainContentProps) {
+export default function MainContent({ activeTab = "overview" }: MainContentProps) {
   const [isClient, setIsClient] = useState(false);
 
   useLayoutEffect(() => {
@@ -61,6 +61,8 @@ export default function MainContent({ activeTab }: MainContentProps) {
     return null;
   }
 
+  const displayedRepos = activeTab === 'overview' ? MOCK_REPOS.slice(0, 3) : MOCK_REPOS;
+
   return (
     <motion.main
       className="flex-1 min-w-0"
@@ -69,7 +71,7 @@ export default function MainContent({ activeTab }: MainContentProps) {
       transition={{ delay: 0.2 }}
     >
       <div className="py-4">
-        {activeTab === "Repositories" && (
+        {activeTab === "skills" && (
           <div className="space-y-4">
             <div className="flex gap-4 mb-4">
               <div className="relative flex-1">
@@ -99,7 +101,7 @@ export default function MainContent({ activeTab }: MainContentProps) {
               initial="hidden"
               animate="show"
             >
-              {MOCK_REPOS.map((repo) => (
+              {displayedRepos.map((repo) => (
                 <motion.div
                   key={repo.name}
                   variants={{
@@ -113,8 +115,39 @@ export default function MainContent({ activeTab }: MainContentProps) {
             </motion.div>
           </div>
         )}
-        {activeTab === "about" && (
-          <ReadmeViewer content={MOCK_README} />
+        {activeTab === "overview" && (
+          <>
+            <ReadmeViewer content={MOCK_README} />
+            <div className="mt-8">
+              <h2 className="text-xl font-semibold mb-4">Popular Repositories</h2>
+              <motion.div
+                className="space-y-4"
+                variants={{
+                  hidden: { opacity: 0 },
+                  show: {
+                    opacity: 1,
+                    transition: {
+                      staggerChildren: 0.1,
+                    },
+                  },
+                }}
+                initial="hidden"
+                animate="show"
+              >
+                {displayedRepos.map((repo) => (
+                  <motion.div
+                    key={repo.name}
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      show: { opacity: 1, y: 0 },
+                    }}
+                  >
+                    <RepositoryCard {...repo} />
+                  </motion.div>
+                ))}
+              </motion.div>
+            </div>
+          </>
         )}
       </div>
     </motion.main>
