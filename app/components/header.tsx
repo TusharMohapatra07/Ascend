@@ -14,7 +14,6 @@ interface HeaderProps {
 const navItems = [
   { name: "Overview", slug: "overview" },
   { name: "Skills", slug: "skills" },
-  { name: "Projects", slug: "projects" },
   { name: "Contact", slug: "contact" },
 ];
 
