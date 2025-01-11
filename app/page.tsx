@@ -1,8 +1,10 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Search } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { Search, ChevronDown } from "lucide-react";
+
 import Header from "./components/header";
 import Profile from "./components/profile";
 import RepositoryCard from "./components/repositoryCard";
@@ -10,8 +12,6 @@ import ReadmeViewer from "./components/ReadmeViewer";
 import ContributionsGraph from "./components/contributionsGraph";
 import ActivityFeed from "./components/activityFeed";
 import Footer from "./components/footer";
-import { useSession } from "next-auth/react";
-import { useRouter } from 'next/navigation';
 
 const MOCK_REPOS = [
   {
@@ -36,6 +36,101 @@ const MOCK_REPOS = [
 
 const MOCK_README = `# Project Title\n\nA brief description...`;
 
+const FILTER_BUTTONS = [
+  { label: "Type", value: "All" },
+  { label: "Language", value: "Any" },
+  { label: "Sort", value: "Last updated" },
+];
+
+interface Repository {
+  name: string;
+  description: string;
+  language: string;
+  languageColor: string;
+  stars: number;
+  forks: number;
+  updatedAt: string;
+}
+
+const RepositorySection = ({ repos }: { repos: Repository[] }) => {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap gap-3">
+        <div className="relative flex-1 min-w-[240px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Find a repository..."
+            className="w-full h-10 pl-10 pr-4 rounded-lg bg-slate-900/40 backdrop-blur-sm
+                     border border-slate-700/50 text-slate-100 placeholder-slate-400
+                     focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/20
+                     transition-all duration-200"
+          />
+        </div>
+
+        {FILTER_BUTTONS.map(({ label, value }) => (
+          <button
+            key={label}
+            className="h-10 px-4 rounded-lg text-sm font-medium whitespace-nowrap
+                     inline-flex items-center gap-2 bg-slate-900/40 backdrop-blur-sm
+                     border border-slate-700/50 text-slate-300 hover:text-slate-100
+                     hover:bg-slate-800/40 hover:border-slate-600/50
+                     focus:outline-none focus:ring-2 focus:ring-blue-500/20
+                     transition-all duration-200"
+          >
+            {label}: {value}
+            <ChevronDown className="w-4 h-4 text-slate-400" />
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        {repos.map((repo, index) => (
+          <div
+            key={repo.name}
+            className="opacity-0 animate-fade-up"
+            style={{
+              animationDelay: `${index * 0.1}s`,
+              animationFillMode: "forwards",
+            }}
+          >
+            <RepositoryCard {...repo} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const OverviewSection = ({ repos }: { repos: Repository[] }) => (
+  <div className="space-y-8">
+    <ContributionsGraph />
+    <ReadmeViewer content={MOCK_README} />
+    <div className="mt-8">
+      <h2 className="text-xl font-semibold mb-4">Popular Repositories</h2>
+      <div className="space-y-4">
+        {repos.slice(0, 3).map((repo, index) => (
+          <div
+            key={repo.name}
+            className="opacity-0 animate-fade-up"
+            style={{
+              animationDelay: `${index * 0.1}s`,
+              animationFillMode: "forwards",
+            }}
+          >
+            <RepositoryCard {...repo} />
+          </div>
+        ))}
+      </div>
+    </div>
+    <ActivityFeed />
+  </div>
+);
+
 export default function Home() {
   const [activeTab, setActiveTab] = useState("overview");
   const { status } = useSession();
@@ -48,105 +143,48 @@ export default function Home() {
   }, [status, router]);
 
   if (status === "loading") {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse text-slate-400">Loading...</div>
+      </div>
+    );
   }
-
-  const displayedRepos = MOCK_REPOS;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header activeTab={activeTab} onTabChange={setActiveTab} />
-      <div className="flex-1 max-w-[1280px] mx-auto px-4 py-6">
+
+      <main className="flex-1 max-w-[1280px] mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row gap-8">
           <Profile />
-          <motion.div 
-            className="flex-1"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
+          <div className="flex-1">
             {activeTab === "skills" ? (
-              <div className="space-y-4">
-                <div className="flex gap-4 mb-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-                    <input
-                      type="text"
-                      placeholder="Find a repository..."
-                      className="input-search pl-10 w-full"
-                    />
-                  </div>
-                  <button className="button-secondary">Type: All</button>
-                  <button className="button-secondary">Language: All</button>
-                  <button className="button-secondary">Sort: Last updated</button>
-                </div>
-                <motion.div
-                  className="grid grid-cols-1 gap-4"
-                  variants={{
-                    hidden: { opacity: 0 },
-                    show: {
-                      opacity: 1,
-                      transition: {
-                        staggerChildren: 0.1,
-                      },
-                    },
-                  }}
-                  initial="hidden"
-                  animate="show"
-                >
-                  {displayedRepos.map((repo) => (
-                    <motion.div
-                      key={repo.name}
-                      variants={{
-                        hidden: { opacity: 0, y: 20 },
-                        show: { opacity: 1, y: 0 },
-                      }}
-                    >
-                      <RepositoryCard {...repo} />
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </div>
+              <RepositorySection repos={MOCK_REPOS} />
             ) : (
-              <div className="space-y-8">
-                <ContributionsGraph />
-                <ReadmeViewer content={MOCK_README} />
-                <div className="mt-8">
-                  <h2 className="text-xl font-semibold mb-4">Popular Repositories</h2>
-                  <motion.div
-                    className="space-y-4"
-                    variants={{
-                      hidden: { opacity: 0 },
-                      show: {
-                        opacity: 1,
-                        transition: {
-                          staggerChildren: 0.1,
-                        },
-                      }
-                    }}
-                    initial="hidden"
-                    animate="show"
-                  >
-                    {displayedRepos.slice(0, 3).map((repo) => (
-                      <motion.div
-                        key={repo.name}
-                        variants={{
-                          hidden: { opacity: 0, y: 20 },
-                          show: { opacity: 1, y: 0 },
-                        }}
-                      >
-                        <RepositoryCard {...repo} />
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                </div>
-                <ActivityFeed />
-              </div>
+              <OverviewSection repos={MOCK_REPOS} />
             )}
-          </motion.div>
+          </div>
         </div>
-      </div>
+      </main>
+
       <Footer />
+
+      <style jsx global>{`
+        @keyframes fadeUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-fade-up {
+          animation: fadeUp 0.5s ease-out;
+        }
+      `}</style>
     </div>
   );
 }

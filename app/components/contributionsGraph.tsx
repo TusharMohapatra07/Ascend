@@ -43,10 +43,10 @@ export default function ContributionsGraph() {
                 <div
                   key={`${weekIndex}-${dayIndex}`}
                   className={`w-3 h-3 rounded-sm ${
-                    day === 0 ? 'bg-gray-200' :
-                    day === 1 ? 'bg-blue-200' :
-                    day === 2 ? 'bg-blue-400' :
-                    'bg-blue-600'
+                    day === 0 ? 'bg-gray-900' :
+                    day === 1 ? 'bg-red-200' :
+                    day === 2 ? 'bg-red-500' :
+                    'bg-red-700'
                   }`}
                 />
               ))}
