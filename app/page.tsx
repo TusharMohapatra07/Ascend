@@ -108,8 +108,11 @@ const RepositorySection = ({ repos }: { repos: Repository[] }) => {
 
 const OverviewSection = ({ repos }: { repos: Repository[] }) => (
   <div className="space-y-8">
+    <div className="border border-white rounded-lg p-5">   
+       <ReadmeViewer content={MOCK_README}/>
+    </div>
     <ContributionsGraph />
-    <ReadmeViewer content={MOCK_README} />
+    
     <div className="mt-8">
       <h2 className="text-xl font-semibold mb-4">Popular Repositories</h2>
       <div className="space-y-4">
