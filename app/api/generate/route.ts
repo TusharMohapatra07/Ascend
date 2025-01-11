@@ -187,7 +187,7 @@ Very important!!!: give data in json format
 
 Now, do this for this prompt: {prompt}
 `;
-//timeline, aspirations
+
 const promptText2 = `
 You are an AI tasked with generating a grouped, daily learning roadmap based on the following details:
 
@@ -196,7 +196,8 @@ You are an AI tasked with generating a grouped, daily learning roadmap based on 
    (Each aspiration should have its own set of topics and subtopics, broken down into granular units.)
 
 **Key Requirements**:
-1. **Topics and Subtopics**: For each aspiration, list granular topics and subtopics grouped over logical day ranges (e.g., Day 1–3, Day 4–6). Break down the topics to ensure steady progress. break down the topics to very very granular level 
+1. **Topics and Subtopics**: For each aspiration, list granular topics and subtopics grouped over logical day ranges (e.g., Day 1–3, Day 4–6). Break down the topics to ensure steady progress. break down the topics to very very granular level. LIke instead combining multiple topics with multiple days, 
+segregate those topics and divide dates among them
 
 for example: 
 
@@ -526,7 +527,7 @@ this is just a part of larger output
     - **Description**: Study NoSQL database management with MongoDB.
     - **Resource**: [MongoDB Docs](https://docs.mongodb.com/)
 
-Give me markdown checklist and nothing else. NO SUBTEXT
+Give me markdown table and nothing else. NO SUBTEXT NO EXTRA TABLE. GIVE ME ENOUGH RESOURCES TO COVER ALL THE MENTIONED TOPICS. 
 `
 
 async function generateTextGemini(prompt: string) {
