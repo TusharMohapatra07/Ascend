@@ -1,5 +1,6 @@
 'use client';
-import { Commit } from '@mui/icons-material';
+import { motion } from 'framer-motion';
+import { Commit} from '@mui/icons-material';
 
 const activities = [
   {
