@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import Image from "next/image"
-import { motion } from "framer-motion"
-import { Sun, Moon, Menu, X, Github } from 'lucide-react'
-import { useState } from "react"
+import Link from "next/link";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { Menu, X, Github } from "lucide-react";
+import { useState } from "react";
 
 interface HeaderProps {
-  activeTab: string
-  onTabChange: (tab: string) => void
+  activeTab: string;
+  onTabChange: (tab: string) => void;
 }
 
 const navItems = [
@@ -16,16 +16,10 @@ const navItems = [
   { name: "Skills", slug: "skills" },
   { name: "Projects", slug: "projects" },
   { name: "Contact", slug: "contact" },
-]
+];
 
 export default function Header({ activeTab, onTabChange }: HeaderProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isDarkMode, setIsDarkMode] = useState(true)
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode)
-    // You would typically update your app's theme state here
-  }
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <motion.header
@@ -38,7 +32,9 @@ export default function Header({ activeTab, onTabChange }: HeaderProps) {
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
               <Github className="h-8 w-8" />
-              <span className="hidden text-xl font-semibold sm:inline-block">MyPortfolio</span>
+              <span className="hidden text-xl font-semibold sm:inline-block">
+                MyPortfolio
+              </span>
             </Link>
           </div>
 
@@ -59,19 +55,6 @@ export default function Header({ activeTab, onTabChange }: HeaderProps) {
           </nav>
 
           <div className="flex items-center space-x-4">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={toggleTheme}
-              className="p-1 rounded-full hover:bg-gray-700"
-            >
-              {isDarkMode ? (
-                <Sun className="h-6 w-6 text-gray-300" />
-              ) : (
-                <Moon className="h-6 w-6 text-gray-300" />
-              )}
-            </motion.button>
-
             <motion.div
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
@@ -112,8 +95,8 @@ export default function Header({ activeTab, onTabChange }: HeaderProps) {
               <button
                 key={item.slug}
                 onClick={() => {
-                  onTabChange(item.slug)
-                  setIsMenuOpen(false)
+                  onTabChange(item.slug);
+                  setIsMenuOpen(false);
                 }}
                 className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium ${
                   activeTab === item.slug
@@ -128,6 +111,5 @@ export default function Header({ activeTab, onTabChange }: HeaderProps) {
         )}
       </div>
     </motion.header>
-  )
+  );
 }
-

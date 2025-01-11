@@ -2,10 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 
-interface ContributionsData {
-  contributionsData: number[][];
-}
-
 const generateMockData = (): number[][] => {
   const data = [];
   for (let i = 0; i < 52; i++) {
