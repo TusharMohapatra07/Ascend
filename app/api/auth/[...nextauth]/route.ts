@@ -9,21 +9,23 @@ const handler = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, account, profile }) {
+    async jwt({ token, account }) {
       if (account) {
         token.accessToken = account.access_token;
       }
       return token;
     },
-    async session({ session, token, user }) {
+    async session({ session, token }) {
       if (session.user) {
+        // @ts-expect-error nothing to see here
+
         session.user.id = token.sub as string;
       }
       return session;
     },
   },
   pages: {
-    signIn: '/auth',
+    signIn: "/auth",
   },
   secret: process.env.NEXTAUTH_SECRET,
 });
