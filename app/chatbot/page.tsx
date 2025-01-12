@@ -8,6 +8,7 @@ import { Send, Bot, Loader2, ArrowLeft } from "lucide-react";
 import dynamic from 'next/dynamic';
 import EditDialog from '../components/EditDialog';
 import SaveDialog from '../components/SaveDialog';
+import { generatePDF } from "@/utils/pdfGenerator";
 
 const ReadmeViewer = dynamic(() => import('../components/ReadmeViewer'), {
   ssr: false
