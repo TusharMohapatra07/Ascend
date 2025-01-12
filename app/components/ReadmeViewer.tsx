@@ -22,7 +22,7 @@ const ReadmeViewer: React.FC<ReadmeViewerProps> = ({ content }) => {
   // Custom components for ReactMarkdown
   const components = {
     // Add checkbox support
-    li: ({ children, ...props }: any) => {
+    li: ({ children, ...props }: { children: React.ReactNode, className?: string }) => {
       if (props.className === 'task-list-item') {
         return (
           <li className="flex items-start gap-2 my-1" {...props}>
@@ -34,17 +34,17 @@ const ReadmeViewer: React.FC<ReadmeViewerProps> = ({ content }) => {
       return <li className="my-1" {...props}>{children}</li>;
     },
     // Enhanced heading styling
-    h1: ({ children }: any) => (
+    h1: ({ children }: { children: React.ReactNode }) => (
       <h1 className="text-2xl font-bold mt-8 mb-4 text-[#c9d1d9] border-b border-[#30363d] pb-2">{children}</h1>
     ),
-    h2: ({ children }: any) => (
+    h2: ({ children }: { children: React.ReactNode }) => (
       <h2 className="text-xl font-semibold mt-6 mb-3 text-[#c9d1d9] border-b border-[#30363d] pb-2">{children}</h2>
     ),
-    h3: ({ children }: any) => (
+    h3: ({ children }: { children: React.ReactNode }) => (
       <h3 className="text-lg font-medium mt-4 mb-2 text-[#c9d1d9]">{children}</h3>
     ),
     // Enhanced link styling
-    a: ({ children, href }: any) => (
+    a: ({ children, href }: { children: React.ReactNode, href?: string }) => (
       <a 
         href={href} 
         target="_blank" 
@@ -55,7 +55,7 @@ const ReadmeViewer: React.FC<ReadmeViewerProps> = ({ content }) => {
       </a>
     ),
     // Code block styling
-    code: ({ inline, children, ...props }: any) => {
+    code: ({ inline, children, ...props }: { inline?: boolean, children: React.ReactNode, className?: string }) => {
       if (inline) {
         return (
           <code className="px-1.5 py-0.5 rounded-md bg-[#21262d] text-[#c9d1d9] font-mono text-sm" {...props}>
