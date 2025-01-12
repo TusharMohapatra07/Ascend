@@ -34,22 +34,7 @@ const MOCK_REPOS = [
   },
 ];
 
-const MOCK_README = `# AI Roadmap Builder
-
-AI Roadmap Builder helps you craft customized learning paths in the world of AI. Explore various technologies, frameworks, and tools through an intuitive interface, just like your favorite repositories.
-
----
-
-### 🎯 Try the Chatbot
-Ready to get started? Interact with our **AI-powered Chatbot** to guide you through the roadmap-building process.
-
-<div align="center">
-  <a href="/chatbot" style="text-decoration: none;">
-    <img src="https://img.shields.io/badge/GENERATE_ROADMAP-181717?style=for-the-badge&logoColor=white" alt="Generate Roadmap" width="300" height="150"/>
-  </a>
-</div>
-
-`;
+const MOCK_README = `# Project Title\n\nA brief description...`;
 
 const FILTER_BUTTONS = [
   { label: "Type", value: "All" },
