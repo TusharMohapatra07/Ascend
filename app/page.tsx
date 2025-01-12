@@ -15,18 +15,18 @@ import Footer from "./components/footer";
 
 const MOCK_REPOS = [
   {
-    name: "react-github-clone",
-    description: "A GitHub profile clone built with React and Tailwind CSS",
-    language: "TypeScript",
+    name: "Backend Development",
+    description: "A roadmap to learn backend development",
+    language: "Node.js",
     languageColor: "#3178c6",
     stars: 128,
     forks: 23,
     updatedAt: "2 days ago",
   },
   {
-    name: "next-js-blog",
-    description: "A simple blog built with Next.js and MDX",
-    language: "JavaScript",
+    name: "System Design and DSA",
+    description: "A roadmap to learn system design and DSA",
+    language: "C++",
     languageColor: "#f1e05a",
     stars: 89,
     forks: 12,
@@ -129,7 +129,7 @@ const OverviewSection = ({ repos }: { repos: Repository[] }) => (
     <ContributionsGraph />
     
     <div className="mt-8">
-      <h2 className="text-xl font-semibold mb-4">Popular Repositories</h2>
+      <h2 className="text-xl font-semibold mb-4">Popular Roadmaps</h2>
       <div className="space-y-4">
         {repos.slice(0, 3).map((repo, index) => (
           <div
