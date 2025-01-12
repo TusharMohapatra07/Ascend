@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
@@ -20,10 +20,10 @@ const ReadmeViewer: React.FC<ReadmeViewerProps> = ({ content }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
   // Custom components for ReactMarkdown
-  const components = {
+  const components: Components = {
     // Add checkbox support
-    li: ({ children, ...props }: { children: React.ReactNode, className?: string }) => {
-      if (props.className === 'task-list-item') {
+    li: ({ children, className, ...props }) => {
+      if (className === 'task-list-item') {
         return (
           <li className="flex items-start gap-2 my-1" {...props}>
             <input type="checkbox" className="mt-1" defaultChecked={false} />
@@ -34,17 +34,17 @@ const ReadmeViewer: React.FC<ReadmeViewerProps> = ({ content }) => {
       return <li className="my-1" {...props}>{children}</li>;
     },
     // Enhanced heading styling
-    h1: ({ children }: { children: React.ReactNode }) => (
-      <h1 className="text-2xl font-bold mt-8 mb-4 text-[#c9d1d9] border-b border-[#30363d] pb-2">{children}</h1>
+    h1: ({ children, ...props }) => (
+      <h1 className="text-2xl font-bold mt-8 mb-4 text-[#c9d1d9] border-b border-[#30363d] pb-2" {...props}>{children}</h1>
     ),
-    h2: ({ children }: { children: React.ReactNode }) => (
-      <h2 className="text-xl font-semibold mt-6 mb-3 text-[#c9d1d9] border-b border-[#30363d] pb-2">{children}</h2>
+    h2: ({ children, ...props }) => (
+      <h2 className="text-xl font-semibold mt-6 mb-3 text-[#c9d1d9] border-b border-[#30363d] pb-2" {...props}>{children}</h2>
     ),
-    h3: ({ children }: { children: React.ReactNode }) => (
-      <h3 className="text-lg font-medium mt-4 mb-2 text-[#c9d1d9]">{children}</h3>
+    h3: ({ children, ...props }) => (
+      <h3 className="text-lg font-medium mt-4 mb-2 text-[#c9d1d9]" {...props}>{children}</h3>
     ),
     // Enhanced link styling
-    a: ({ children, href }: { children: React.ReactNode, href?: string }) => (
+    a: ({ children, href }) => (
       <a 
         href={href} 
         target="_blank" 
@@ -55,7 +55,8 @@ const ReadmeViewer: React.FC<ReadmeViewerProps> = ({ content }) => {
       </a>
     ),
     // Code block styling
-    code: ({ inline, children, ...props }: { inline?: boolean, children: React.ReactNode, className?: string }) => {
+    //@ts-expect-error hello world world
+    code: ({ inline, children, ...props }) => {
       if (inline) {
         return (
           <code className="px-1.5 py-0.5 rounded-md bg-[#21262d] text-[#c9d1d9] font-mono text-sm" {...props}>
