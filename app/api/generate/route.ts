@@ -202,6 +202,8 @@ segregate those topics and divide dates among them
 
 DO NOT STRAIGHT AWAY PUT OFF NO, TRY TO ANALYSE AND UNDERSTAND THE REQUIREMENT SOME MIGHT BE PREPARING FOR INTERVIEWS SOME FOR HACKATHONS ETC. YOU SHOULD COVER ALL THE CASES
 
+DO NOT GIVE ANY ADDITIONAL INFORMATION EXCEPT THE TABLE 
+
 for example: 
 
 
@@ -584,20 +586,16 @@ export async function PUT(req: Request) {
         const roadmapMarkdown = await generateTextGemini(finalPrompt);
 
         // Convert markdown to JSON structure
-        const jsonResponse = await fetch('/api/markdownToJson', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ markdown: roadmapMarkdown })
-        });
+        // const jsonResponse = await fetch('/api/markdownToJson', {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     body: JSON.stringify({ markdown: roadmapMarkdown })
+        // });
 
-        const sectionsData = await jsonResponse.json();
-
+        // const sectionsData = await jsonResponse.json();
         return NextResponse.json({
             error: false,
             markdown: roadmapMarkdown,
-            sections: sectionsData,
-            timeline,
-            aspirations
         });
     } catch (error) {
         // Handle any unexpected errors
