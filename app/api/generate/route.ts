@@ -550,6 +550,7 @@ async function generateTextGemini(prompt: string) {
 export async function PUT(req: Request) {
     try {
         const { prompt } = await req.json(); // Assuming the request body is JSON and contains "prompt"
+        const { prompt } = await req.json(); // Assuming the request body is JSON and contains "prompt"
 
         if (!prompt) {
             return NextResponse.json(
@@ -566,8 +567,13 @@ export async function PUT(req: Request) {
             .replace(/\n```\n$/, "")
             .trim();
 
-        const {error,aspirations, timeline} = JSON.parse(cleanedResponse);
+        const {error,aspirations,known_skills, timeline} = JSON.parse(cleanedResponse);
 
+        if (!error) {
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "Unknown error occurred";
         if (!error) {
             const errorMessage =
                 error instanceof Error
@@ -576,36 +582,33 @@ export async function PUT(req: Request) {
             return NextResponse.json(
                 { error: "Server error", details: errorMessage },
                 { status: 500 }
+                { error: "Server error", details: errorMessage },
+                { status: 500 }
             );
         }
 
-        const finalPrompt = promptText2
-            .replace("{timeline}", timeline)
-            .replace("{aspirations}", aspirations.join(", "));
+        if(known_skills.length === 0){
+         const finalPrompt =  promptText2.replace("{timeline}", timeline).replace("{aspirations}", aspirations.reduce(
+          (acc : string, curr :string) => acc + "," + curr, ""
+         ))
+         const resultStr  = await generateTextGemini(finalPrompt)
+         console.log(resultStr)
 
-        const roadmapMarkdown = await generateTextGemini(finalPrompt);
+        }else{
 
-        // Convert markdown to JSON structure
-        const jsonResponse = await fetch('/api/markdownToJson', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ markdown: roadmapMarkdown })
-        });
+        }
 
-        const sectionsData = await jsonResponse.json();
-
-        return NextResponse.json({
-            error: false,
-            markdown: roadmapMarkdown,
-            sections: sectionsData,
-            timeline,
-            aspirations
-        });
+        // Process the prompt here, e.g., send to an external API or process it
+        return NextResponse.json({});
     } catch (error) {
         // Handle any unexpected errors
         const errorMessage =
             error instanceof Error ? error.message : "Unknown error occurred";
+        // Handle any unexpected errors
+        const errorMessage =
+            error instanceof Error ? error.message : "Unknown error occurred";
         return NextResponse.json(
+            { error: "Server error", details: errorMessage },
             { error: "Server error", details: errorMessage },
             { status: 500 }
         );
