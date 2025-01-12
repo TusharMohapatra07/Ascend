@@ -9,8 +9,21 @@ import NotionLikeView from '../components/NotionLikeView';
 const ReadmeViewer = dynamic(() => import('../components/ReadmeViewer'), {
   ssr: false
 });
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Send, Bot, Loader2, ArrowLeft } from "lucide-react";
+import dynamic from 'next/dynamic';
+import NotionLikeView from '../components/NotionLikeView';
+
+const ReadmeViewer = dynamic(() => import('../components/ReadmeViewer'), {
+  ssr: false
+});
 
 interface Message {
+  id: string;
+  text: string;
+  sender: "user" | "bot";
+  timestamp: Date;
   id: string;
   text: string;
   sender: "user" | "bot";
@@ -23,14 +36,23 @@ const ChatBot: React.FC = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [roadmap, setRoadmap] = useState<{
     content: string;
+    timeline: string;
+    aspirations: string[];
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showMarkdown, setShowMarkdown] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
 
   const handleSend = async () => {
     if (!input.trim()) return;
+  const handleSend = async () => {
+    if (!input.trim()) return;
 
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      text: input,
+      sender: "user",
+      timestamp: new Date(),
+    };
     const newMessage: Message = {
       id: Date.now().toString(),
       text: input,
@@ -42,7 +64,17 @@ const ChatBot: React.FC = () => {
     setInput("");
     setIsTyping(true);
     setError(null);
+    setMessages((prev) => [...prev, newMessage]);
+    setInput("");
+    setIsTyping(true);
+    setError(null);
 
+    try {
+      const response = await fetch("/api/generate", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: input }),
+      });
     try {
       const response = await fetch("/api/generate", {
         method: "PUT",
@@ -51,12 +83,15 @@ const ChatBot: React.FC = () => {
       });
 
       const data = await response.json();
+      const data = await response.json();
 
       if (data.error) {
         setError(data.message);
       } else {
         setRoadmap({
-          content: data.markdown
+          content: data.markdown,
+          timeline: data.timeline,
+          aspirations: data.aspirations,
         });
       }
     } catch (err) {
@@ -77,15 +112,6 @@ const ChatBot: React.FC = () => {
     }
   };
 
-  const handleEditRoadmap = () => {
-    setIsEditing(true);
-  };
-
-  const handleSaveRoadmap = async () => {
-    // TODO: Implement save functionality
-    setIsEditing(false);
-  };
-
   return (
     <div className="min-h-screen bg-[#0d1117] overflow-auto">
       <AnimatePresence mode="wait">
@@ -97,43 +123,57 @@ const ChatBot: React.FC = () => {
             className="max-w-6xl mx-auto p-4 space-y-6"
           >
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setRoadmap(null)}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium
-                           text-[#c9d1d9] rounded-lg bg-[#21262d] hover:bg-[#30363d]
-                           border border-[#30363d] transition-colors duration-200"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Back to Chat
-                </button>
-              </div>
+              <button
+                onClick={() => setRoadmap(null)}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium
+                         text-[#c9d1d9] rounded-lg bg-[#21262d] hover:bg-[#30363d]
+                         border border-[#30363d] transition-colors duration-200"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Chat
+              </button>
               
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleEditRoadmap}
-                  className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium
-                           rounded-lg border transition-colors duration-200
-                           ${isEditing 
-                             ? 'text-[#c9d1d9] bg-[#30363d] border-[#6e7681]' 
-                             : 'text-[#c9d1d9] bg-[#21262d] border-[#30363d] hover:bg-[#30363d]'
-                           }`}
-                >
-                  Edit Roadmap
-                </button>
-                <button
-                  onClick={handleSaveRoadmap}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium
-                           text-white rounded-lg bg-[#238636] hover:bg-[#2ea043]
-                           border border-[#238636] transition-colors duration-200"
-                >
-                  Save Roadmap
-                </button>
+              <div className="flex items-center gap-4">
+                <div className="px-4 py-2 rounded-lg bg-[#21262d] border border-[#30363d]">
+                  <span className="text-sm text-[#8b949e]">Timeline:</span>
+                  <span className="ml-2 text-[#c9d1d9]">{roadmap.timeline}</span>
+                </div>
               </div>
             </div>
 
             <div className="grid gap-6">
-              <ReadmeViewer content={roadmap.content} />
+              <div className="bg-[#161b22] rounded-lg border border-[#30363d] p-6">
+                <h2 className="text-xl font-semibold text-[#c9d1d9] mb-4">Learning Goals</h2>
+                <div className="space-y-2">
+                  {roadmap.aspirations.map((aspiration, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 text-[#c9d1d9] bg-[#21262d] 
+                               px-4 py-2 rounded-lg border border-[#30363d]"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-[#238636]" />
+                      {aspiration}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-end mb-4">
+                <button
+                  onClick={() => setShowMarkdown(!showMarkdown)}
+                  className="px-4 py-2 text-sm font-medium text-[#c9d1d9] 
+                           bg-[#21262d] rounded-lg hover:bg-[#30363d] 
+                           border border-[#30363d] transition-colors"
+                >
+                  Show {showMarkdown ? 'Timeline View' : 'Markdown'}
+                </button>
+              </div>
+
+              {showMarkdown ? (
+                <ReadmeViewer content={roadmap.content} />
+              ) : (
+                <NotionLikeView sections={roadmap.sections} />
+              )}
             </div>
           </motion.div>
         ) : (
@@ -220,7 +260,22 @@ const ChatBot: React.FC = () => {
               >
                 {error}
               </motion.div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-center"
+              >
+                {error}
+              </motion.div>
             )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export default ChatBot;
           </motion.div>
         )}
       </AnimatePresence>
