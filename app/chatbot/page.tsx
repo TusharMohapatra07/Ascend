@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, Bot, Loader2, ArrowLeft } from "lucide-react";
 import dynamic from 'next/dynamic';
 import NotionLikeView from '../components/NotionLikeView';
+import EditDialog from '../components/EditDialog';
 
 const ReadmeViewer = dynamic(() => import('../components/ReadmeViewer'), {
   ssr: false
@@ -17,6 +18,12 @@ interface Message {
   timestamp: Date;
 }
 
+interface RoadmapVersion {
+  content: string;
+  timestamp: Date;
+  prompt?: string;
+}
+
 const ChatBot: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -27,6 +34,9 @@ const ChatBot: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showMarkdown, setShowMarkdown] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [versions, setVersions] = useState<RoadmapVersion[]>([]);
+  const [currentVersionIndex, setCurrentVersionIndex] = useState(0);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -55,6 +65,13 @@ const ChatBot: React.FC = () => {
       if (data.error) {
         setError(data.message);
       } else {
+        const newVersion: RoadmapVersion = {
+          content: data.markdown,
+          timestamp: new Date(),
+          prompt: input
+        };
+        setVersions([newVersion]);
+        setCurrentVersionIndex(0);
         setRoadmap({
           content: data.markdown
         });
@@ -77,13 +94,40 @@ const ChatBot: React.FC = () => {
     }
   };
 
-  const handleEditRoadmap = () => {
-    setIsEditing(true);
+  const handleEditSubmit = async (editPrompt: string) => {
+    try {
+      const response = await fetch("/api/edit", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          table: roadmap?.content,
+          userPrompt: editPrompt
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        setError(data.message);
+      } else {
+        const newVersion: RoadmapVersion = {
+          content: data.response,
+          timestamp: new Date(),
+          prompt: editPrompt
+        };
+        setVersions([...versions, newVersion]);
+        setCurrentVersionIndex(versions.length);
+        setRoadmap({ content: data.response });
+      }
+    } catch (err) {
+      setError(`Failed to edit roadmap: ${err instanceof Error ? err.message : "Please try again."}`);
+    }
+    setIsDialogOpen(false);
   };
 
-  const handleSaveRoadmap = async () => {
-    // TODO: Implement save functionality
-    setIsEditing(false);
+  const handleVersionChange = (index: number) => {
+    setCurrentVersionIndex(index);
+    setRoadmap({ content: versions[index].content });
   };
 
   return (
@@ -96,7 +140,7 @@ const ChatBot: React.FC = () => {
             exit={{ opacity: 0 }}
             className="max-w-6xl mx-auto p-4 space-y-6"
           >
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setRoadmap(null)}
@@ -110,19 +154,28 @@ const ChatBot: React.FC = () => {
               </div>
               
               <div className="flex items-center gap-2">
+                <select
+                  value={currentVersionIndex}
+                  onChange={(e) => handleVersionChange(Number(e.target.value))}
+                  className="bg-[#21262d] text-[#c9d1d9] border border-[#30363d] 
+                           rounded-lg px-3 py-2 text-sm"
+                >
+                  {versions.map((version, index) => (
+                    <option key={version.timestamp.toISOString()} value={index}>
+                      Version {index + 1} - {version.timestamp.toLocaleString()}
+                    </option>
+                  ))}
+                </select>
                 <button
-                  onClick={handleEditRoadmap}
+                  onClick={() => setIsDialogOpen(true)}
                   className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium
                            rounded-lg border transition-colors duration-200
-                           ${isEditing 
-                             ? 'text-[#c9d1d9] bg-[#30363d] border-[#6e7681]' 
-                             : 'text-[#c9d1d9] bg-[#21262d] border-[#30363d] hover:bg-[#30363d]'
-                           }`}
+                           text-[#c9d1d9] bg-[#21262d] border-[#30363d] hover:bg-[#30363d]`}
                 >
                   Edit Roadmap
                 </button>
                 <button
-                  onClick={handleSaveRoadmap}
+                //   onClick={handleSaveRoadmap}
                   className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium
                            text-white rounded-lg bg-[#238636] hover:bg-[#2ea043]
                            border border-[#238636] transition-colors duration-200"
@@ -135,6 +188,14 @@ const ChatBot: React.FC = () => {
             <div className="grid gap-6">
               <ReadmeViewer content={roadmap.content} />
             </div>
+
+            <EditDialog
+              isOpen={isDialogOpen}
+              onClose={() => setIsDialogOpen(false)}
+              onSubmit={handleEditSubmit}
+              currentContent={roadmap.content}
+              isLoading={isTyping}
+            />
           </motion.div>
         ) : (
           <motion.div
