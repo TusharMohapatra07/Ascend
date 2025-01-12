@@ -4,7 +4,6 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Bot, Loader2, ArrowLeft } from "lucide-react";
 import dynamic from 'next/dynamic';
-import NotionLikeView from '../components/NotionLikeView';
 import EditDialog from '../components/EditDialog';
 
 const ReadmeViewer = dynamic(() => import('../components/ReadmeViewer'), {
@@ -32,8 +31,6 @@ const ChatBot: React.FC = () => {
     content: string;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [showMarkdown, setShowMarkdown] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [versions, setVersions] = useState<RoadmapVersion[]>([]);
   const [currentVersionIndex, setCurrentVersionIndex] = useState(0);
