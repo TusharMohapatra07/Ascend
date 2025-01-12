@@ -32,7 +32,7 @@ export default function Header({ activeTab, onTabChange }: HeaderProps) {
             <Link href="/" className="flex items-center space-x-2">
               <Github className="h-8 w-8" />
               <span className="hidden text-xl font-semibold sm:inline-block">
-                MyPortfolio
+                Ascend
               </span>
             </Link>
           </div>
