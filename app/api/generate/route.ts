@@ -199,6 +199,9 @@ You are an AI tasked with generating a grouped, daily learning roadmap based on 
 1. **Topics and Subtopics**: For each aspiration, list granular topics and subtopics grouped over logical day ranges (e.g., Day 1–3, Day 4–6). Break down the topics to ensure steady progress. break down the topics to very very granular level. LIke instead combining multiple topics with multiple days, 
 segregate those topics and divide dates among them
 
+
+DO NOT STRAIGHT AWAY PUT OFF NO, TRY TO ANALYSE AND UNDERSTAND THE REQUIREMENT SOME MIGHT BE PREPARING FOR INTERVIEWS SOME FOR HACKATHONS ETC. YOU SHOULD COVER ALL THE CASES
+
 for example: 
 
 
@@ -527,7 +530,8 @@ this is just a part of larger output
     - **Description**: Study NoSQL database management with MongoDB.
     - **Resource**: [MongoDB Docs](https://docs.mongodb.com/)
 
-Give me markdown table and nothing else. NO SUBTEXT NO EXTRA TABLE. GIVE ME ENOUGH RESOURCES TO COVER ALL THE MENTIONED TOPICS. 
+Give me markdown table and nothing else. NO SUBTEXT NO EXTRA TABLE. GIVE ME ENOUGH RESOURCES TO COVER ALL THE MENTIONED TOPICS. SOME LINKS ARE BROKEN PLEASE ENSURE THE LINKS ARE VALID. 
+
 `
 
 async function generateTextGemini(prompt: string) {
