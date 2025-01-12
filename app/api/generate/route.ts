@@ -577,19 +577,28 @@ export async function PUT(req: Request) {
             );
         }
 
-        if(known_skills.length === 0){
-         const finalPrompt =  promptText2.replace("{timeline}", timeline).replace("{aspirations}", aspirations.reduce(
-          (acc : string, curr :string) => acc + "," + curr, ""
-         ))
-         const resultStr  = await generateTextGemini(finalPrompt)
-         console.log(resultStr)
+        const finalPrompt = promptText2
+            .replace("{timeline}", timeline)
+            .replace("{aspirations}", aspirations.join(", "));
 
-        }else{
+        const roadmapMarkdown = await generateTextGemini(finalPrompt);
 
-        }
+        // Convert markdown to JSON structure
+        const jsonResponse = await fetch('/api/markdownToJson', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ markdown: roadmapMarkdown })
+        });
 
-        // Process the prompt here, e.g., send to an external API or process it
-        return NextResponse.json({});
+        const sectionsData = await jsonResponse.json();
+
+        return NextResponse.json({
+            error: false,
+            markdown: roadmapMarkdown,
+            sections: sectionsData,
+            timeline,
+            aspirations
+        });
     } catch (error) {
         // Handle any unexpected errors
         const errorMessage =
