@@ -579,9 +579,19 @@ export async function PUT(req: Request) {
 
         const roadmapMarkdown = await generateTextGemini(finalPrompt);
 
+        // Convert markdown to JSON structure
+        const jsonResponse = await fetch('/api/markdownToJson', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ markdown: roadmapMarkdown })
+        });
+
+        const sectionsData = await jsonResponse.json();
+
         return NextResponse.json({
             error: false,
             markdown: roadmapMarkdown,
+            sections: sectionsData,
             timeline,
             aspirations
         });
