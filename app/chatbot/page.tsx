@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Bot, Loader2, ArrowLeft } from "lucide-react";
 import dynamic from 'next/dynamic';
 import EditDialog from '../components/EditDialog';
+import SaveDialog from '../components/SaveDialog';
 
 const ReadmeViewer = dynamic(() => import('../components/ReadmeViewer'), {
   ssr: false
@@ -24,6 +27,8 @@ interface RoadmapVersion {
 }
 
 const ChatBot: React.FC = () => {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -34,6 +39,21 @@ const ChatBot: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [versions, setVersions] = useState<RoadmapVersion[]>([]);
   const [currentVersionIndex, setCurrentVersionIndex] = useState(0);
+  const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/api/auth/signin");
+    }
+  }, [status, router]);
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-[#0d1117] flex items-center justify-center">
+        <div className="animate-pulse text-[#8b949e]">Loading...</div>
+      </div>
+    );
+  }
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -127,6 +147,14 @@ const ChatBot: React.FC = () => {
     setRoadmap({ content: versions[index].content });
   };
 
+  const handleSavePDF = (name: string) => {
+    if (roadmap?.content) {
+      const pdf = generatePDF(roadmap.content, name);
+      pdf.save(`${name.toLowerCase().replace(/\s+/g, '-')}-roadmap.pdf`);
+      setIsSaveDialogOpen(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0d1117] overflow-auto">
       <AnimatePresence mode="wait">
@@ -172,12 +200,12 @@ const ChatBot: React.FC = () => {
                   Edit Roadmap
                 </button>
                 <button
-                //   onClick={handleSaveRoadmap}
+                  onClick={() => setIsSaveDialogOpen(true)}
                   className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium
                            text-white rounded-lg bg-[#238636] hover:bg-[#2ea043]
                            border border-[#238636] transition-colors duration-200"
                 >
-                  Save Roadmap
+                  Download PDF
                 </button>
               </div>
             </div>
@@ -192,6 +220,13 @@ const ChatBot: React.FC = () => {
               onSubmit={handleEditSubmit}
               currentContent={roadmap.content}
               isLoading={isTyping}
+            />
+
+            <SaveDialog
+              isOpen={isSaveDialogOpen}
+              onClose={() => setIsSaveDialogOpen(false)}
+              onSave={handleSavePDF}
+              content={roadmap?.content || ''}
             />
           </motion.div>
         ) : (
