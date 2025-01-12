@@ -542,7 +542,7 @@ async function generateTextGemini(prompt: string) {
 
 export async function PUT(req: Request) {
     try {
-        const { prompt } = await req.json(); // Assuming the request body is JSON and contains "prompt"
+        const { prompt } = await req.json();
 
         if (!prompt) {
             return NextResponse.json(
@@ -559,38 +559,31 @@ export async function PUT(req: Request) {
             .replace(/\n```\n$/, "")
             .trim();
 
-        const {error,aspirations,known_skills, timeline} = JSON.parse(cleanedResponse);
+        const { error, aspirations, timeline, notes } = JSON.parse(cleanedResponse);
 
-        if (!error) {
-            const errorMessage =
-                error instanceof Error
-                    ? error.message
-                    : "Unknown error occurred";
+        if (error) {
             return NextResponse.json(
-                { error: "Server error", details: errorMessage },
-                { status: 500 }
+                { error: true, message: notes },
+                { status: 400 }
             );
         }
 
-        if(known_skills.length === 0){
-         const finalPrompt =  promptText2.replace("{timeline}", timeline).replace("{aspirations}", aspirations.reduce(
-          (acc : string, curr :string) => acc + "," + curr, ""
-         ))
-         const resultStr  = await generateTextGemini(finalPrompt)
-         console.log(resultStr)
+        const finalPrompt = promptText2
+            .replace("{timeline}", timeline)
+            .replace("{aspirations}", aspirations.join(", "));
 
-        }else{
+        const roadmapMarkdown = await generateTextGemini(finalPrompt);
 
-        }
-
-        // Process the prompt here, e.g., send to an external API or process it
-        return NextResponse.json({});
+        return NextResponse.json({
+            error: false,
+            markdown: roadmapMarkdown,
+            timeline,
+            aspirations
+        });
     } catch (error) {
-        // Handle any unexpected errors
-        const errorMessage =
-            error instanceof Error ? error.message : "Unknown error occurred";
+        const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
         return NextResponse.json(
-            { error: "Server error", details: errorMessage },
+            { error: true, message: errorMessage },
             { status: 500 }
         );
     }
