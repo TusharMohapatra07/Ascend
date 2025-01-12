@@ -5,8 +5,6 @@ import Image from "next/image";
 import {
   LocationOn,
   Email,
-  Link as LinkIcon,
-  People,
   GitHub,
   Language,
 } from "@mui/icons-material";
