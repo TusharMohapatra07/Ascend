@@ -1,7 +1,15 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+// Add type augmentation for jspdf-autotable
+import { UserOptions } from 'jspdf-autotable';
 
-export const generatePDF = (content: string, name: string) => {
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: (options: UserOptions) => jsPDF;
+  }
+}
+
+export const generatePDF = (content: string, name: string): jsPDF => {
   const pdf = new jsPDF();
   
   // Add title
