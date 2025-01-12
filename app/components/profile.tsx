@@ -1,16 +1,24 @@
 "use client";
+
 import { motion } from "framer-motion";
 import Image from "next/image";
 import {
   LocationOn,
   Email,
-  Link as LinkIcon,
-  People,
   GitHub,
   Language,
 } from "@mui/icons-material";
+import { useSession } from "next-auth/react";
 
 export default function Profile() {
+  const { data: session } = useSession();
+
+  // Fallback values in case session data is unavailable
+  const profileImage = session?.user?.image || "/default-profile.jpg";
+  const name = session?.user?.name || "John Doe";
+  const username = session?.user?.email?.split("@")[0] || "johndoe";
+  const email = session?.user?.email || "johndoe@example.com";
+
   return (
     <motion.aside
       initial={{ opacity: 0, x: -20 }}
@@ -22,17 +30,21 @@ export default function Profile() {
         whileHover={{ scale: 1.02 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
-        <Image src="https://avatars.githubusercontent.com/u/137442734?v=4" className="w-[296px] h-[296px] rounded-full border border-gray-300 dark:border-gray-700"  width={296} height={296} alt="profile picture"/>
-          {/* <People className="w-full h-full p-16 text-gray-400" /> */}
-        {/* <Image src="https://avatars.githubusercontent.com/u/137442734?v=4" alt="John Doe" width={296} height={296}  className="w-full h-full p-16 text-gray-400" /> */}
+        <Image
+          src={profileImage}
+          className="w-[296px] h-[296px] rounded-full border border-gray-300 dark:border-gray-700"
+          width={296}
+          height={296}
+          alt="profile picture"
+        />
       </motion.div>
 
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-          John Doe
+          {name}
         </h1>
         <p className="text-xl font-light text-gray-600 dark:text-gray-400">
-          @johndoe
+          @{username}
         </p>
       </div>
 
@@ -48,40 +60,15 @@ export default function Profile() {
         <div className="flex flex-col gap-2 text-gray-600 dark:text-gray-400">
           <div className="flex items-center gap-2 text-sm">
             <LocationOn fontSize="small" />
-            <span>San Francisco, CA</span>
+            <span>India</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <Email fontSize="small" />
             <a
-              href="mailto:johndoe@example.com"
+              href={`mailto:${email}`}
               className="text-blue-600 dark:text-blue-400 hover:underline"
             >
-              johndoe@example.com
-            </a>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <LinkIcon fontSize="small" />
-            <a
-              href="https://johndoe.com"
-              className="text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              johndoe.com
-            </a>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <People fontSize="small" />
-            <a
-              href="#"
-              className="hover:text-blue-600 dark:hover:text-blue-400"
-            >
-              <span className="font-semibold">1.5k</span> followers
-            </a>
-            <span>·</span>
-            <a
-              href="#"
-              className="hover:text-blue-600 dark:hover:text-blue-400"
-            >
-              <span className="font-semibold">234</span> following
+              {email}
             </a>
           </div>
         </div>

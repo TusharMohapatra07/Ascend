@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Menu, X, Github } from "lucide-react";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 
 interface HeaderProps {
   activeTab: string;
@@ -19,6 +20,9 @@ const navItems = [
 
 export default function Header({ activeTab, onTabChange }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { data: session } = useSession();
+
+  const profileImage = session?.user?.image || "/default-profile.jpg"; // Fallback to a default profile image if none is available
 
   return (
     <motion.header
@@ -60,7 +64,7 @@ export default function Header({ activeTab, onTabChange }: HeaderProps) {
               className="relative"
             >
               <Image
-                src="/137442734.jpeg"
+                src={profileImage}
                 alt="Profile"
                 width={32}
                 height={32}

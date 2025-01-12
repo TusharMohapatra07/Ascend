@@ -5,8 +5,8 @@ const activities = [
   {
     type: 'commit',
     icon: Commit,
-    message: 'Committed to main',
-    repo: 'example-repo',
+    message: 'Generated Roadmap for Backend Development',
+    repo: 'Backend Development',
     time: '2 days ago'
   },
   // Add more mock activities
@@ -27,7 +27,7 @@ export default function ActivityFeed() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[14px] text-gray-100 leading-[1.5]">
-                <a href="#" className="text-blue-400 hover:underline font-semibold">johndoe</a>
+                <a href="#" className="text-blue-400 hover:underline font-semibold">You</a>
                 {' '}{activity.message}{' '}
                 <a href="#" className="text-blue-400 hover:underline">{activity.repo}</a>
               </p>
