@@ -27,7 +27,7 @@ interface RoadmapVersion {
 }
 
 const ChatBot: React.FC = () => {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");

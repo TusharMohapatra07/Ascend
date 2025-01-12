@@ -14,8 +14,7 @@ interface SaveDialogProps {
 const SaveDialog: React.FC<SaveDialogProps> = ({
   isOpen,
   onClose,
-  onSave,
-  content
+  onSave
 }) => {
   const [name, setName] = useState('');
 
