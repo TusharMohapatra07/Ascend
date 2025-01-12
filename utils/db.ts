@@ -1,5 +1,4 @@
 import {Schema, model} from "mongoose"
-import { json } from "stream/consumers"
 
 const userSchema = new Schema({
     email:{type:String, require:true},
@@ -15,7 +14,8 @@ const userSchema = new Schema({
 })
 
 const skillSchmea = new Schema({
-   content:json
+    content: Schema.Types.Mixed,
+    email:String // Use Mixed for flexible data types
 })
 
 export const User = model('User', userSchema)

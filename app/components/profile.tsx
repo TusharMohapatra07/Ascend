@@ -1,4 +1,5 @@
 "use client";
+
 import { motion } from "framer-motion";
 import Image from "next/image";
 import {
@@ -7,10 +8,53 @@ import {
   Link as LinkIcon,
   People,
   GitHub,
-  Language,
 } from "@mui/icons-material";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+
+interface MongoUserData {
+  bio?: string;
+  location?: string;
+  website?: string;
+  followers?: number;
+  following?: number;
+  achievements?: string[];
+  organizations?: { name: string; link: string }[];
+}
 
 export default function Profile() {
+  const { data: session } = useSession();
+  const [mongoData, setMongoData] = useState<MongoUserData | null>(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (session?.user?.email) {
+        try {
+          const response = await fetch(`/api/user?email=${session.user.email}`);
+          if (!response.ok) {
+            throw new Error(`Error fetching user data: ${response.statusText}`);
+          }
+          const data: MongoUserData = await response.json();
+          setMongoData(data);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, [session]);
+
+  if (!session) {
+    return (
+      <p className="text-gray-600 dark:text-gray-400">
+        Please sign in to view your profile.
+      </p>
+    );
+  }
+
+  const user = session.user;
+
   return (
     <motion.aside
       initial={{ opacity: 0, x: -20 }}
@@ -22,23 +66,27 @@ export default function Profile() {
         whileHover={{ scale: 1.02 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
-        <Image src="https://avatars.githubusercontent.com/u/137442734?v=4" className="w-[296px] h-[296px] rounded-full border border-gray-300 dark:border-gray-700"  width={296} height={296} alt="profile picture"/>
-          {/* <People className="w-full h-full p-16 text-gray-400" /> */}
-        {/* <Image src="https://avatars.githubusercontent.com/u/137442734?v=4" alt="John Doe" width={296} height={296}  className="w-full h-full p-16 text-gray-400" /> */}
+        <Image
+          src={user.image || "/default-avatar.png"}
+          className="w-[296px] h-[296px] rounded-full border border-gray-300 dark:border-gray-700"
+          width={296}
+          height={296}
+          alt={`${user.name || "User"}'s profile picture`}
+        />
       </motion.div>
 
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-          John Doe
+          {user.name || "Anonymous"}
         </h1>
         <p className="text-xl font-light text-gray-600 dark:text-gray-400">
-          @johndoe
+          @{user.name?.toLowerCase().replace(/\s+/g, "") || "unknown"}
         </p>
       </div>
 
       <div className="space-y-3">
         <p className="text-base text-gray-600 dark:text-gray-300">
-          Full-stack developer passionate about open source
+          {mongoData?.bio || "Full-stack developer passionate about open source"}
         </p>
 
         <button className="w-full py-1 px-3 text-sm font-semibold border border-gray-300 dark:border-gray-700 rounded-md bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white transition-colors">
@@ -46,74 +94,95 @@ export default function Profile() {
         </button>
 
         <div className="flex flex-col gap-2 text-gray-600 dark:text-gray-400">
-          <div className="flex items-center gap-2 text-sm">
-            <LocationOn fontSize="small" />
-            <span>San Francisco, CA</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <Email fontSize="small" />
-            <a
-              href="mailto:johndoe@example.com"
-              className="text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              johndoe@example.com
-            </a>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <LinkIcon fontSize="small" />
-            <a
-              href="https://johndoe.com"
-              className="text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              johndoe.com
-            </a>
-          </div>
+          {mongoData?.location && (
+            <div className="flex items-center gap-2 text-sm">
+              <LocationOn fontSize="small" />
+              <span>{mongoData.location}</span>
+            </div>
+          )}
+          {user.email && (
+            <div className="flex items-center gap-2 text-sm">
+              <Email fontSize="small" />
+              <a
+                href={`mailto:${user.email}`}
+                className="text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                {user.email}
+              </a>
+            </div>
+          )}
+          {mongoData?.website && (
+            <div className="flex items-center gap-2 text-sm">
+              <LinkIcon fontSize="small" />
+              <a
+                href={mongoData.website}
+                className="text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                {mongoData.website}
+              </a>
+            </div>
+          )}
           <div className="flex items-center gap-2 text-sm">
             <People fontSize="small" />
             <a
               href="#"
               className="hover:text-blue-600 dark:hover:text-blue-400"
             >
-              <span className="font-semibold">1.5k</span> followers
+              <span className="font-semibold">
+                {mongoData?.followers || 0}
+              </span>{" "}
+              followers
             </a>
             <span>·</span>
             <a
               href="#"
               className="hover:text-blue-600 dark:hover:text-blue-400"
             >
-              <span className="font-semibold">234</span> following
+              <span className="font-semibold">
+                {mongoData?.following || 0}
+              </span>{" "}
+              following
             </a>
           </div>
         </div>
       </div>
 
-      <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-        <h2 className="mb-2 text-base font-semibold text-gray-900 dark:text-white">
-          Achievements
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400">
-            Arctic Code Vault Contributor
-          </span>
-          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400">
-            GitHub Star
-          </span>
+      {mongoData?.achievements?.length > 0 && (
+        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+          <h2 className="mb-2 text-base font-semibold text-gray-900 dark:text-white">
+            Achievements
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {mongoData.achievements.map((achievement, idx) => (
+              <span
+                key={idx}
+                className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400"
+              >
+                {achievement}
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-        <h2 className="mb-2 text-base font-semibold text-gray-900 dark:text-white">
-          Organizations
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          <a href="#" className="hover:opacity-75 transition-opacity">
-            <GitHub className="w-8 h-8 text-gray-600 dark:text-gray-400" />
-          </a>
-          <a href="#" className="hover:opacity-75 transition-opacity">
-            <Language className="w-8 h-8 text-gray-600 dark:text-gray-400" />
-          </a>
+      {mongoData?.organizations?.length > 0 && (
+        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+          <h2 className="mb-2 text-base font-semibold text-gray-900 dark:text-white">
+            Organizations
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {mongoData.organizations.map((org, idx) => (
+              <a
+                key={idx}
+                href={org.link}
+                className="hover:opacity-75 transition-opacity"
+              >
+                <GitHub className="w-8 h-8 text-gray-600 dark:text-gray-400" />
+              </a>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </motion.aside>
   );
 }

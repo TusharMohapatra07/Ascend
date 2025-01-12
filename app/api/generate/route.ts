@@ -564,7 +564,7 @@ export async function PUT(req: Request) {
             .replace(/\n```\n$/, "")
             .trim();
 
-        const {error,aspirations,known_skills, timeline} = JSON.parse(cleanedResponse);
+        const {error,aspirations, timeline} = JSON.parse(cleanedResponse);
 
         if (!error) {
             const errorMessage =

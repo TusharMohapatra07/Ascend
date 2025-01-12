@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Menu, X, Github } from "lucide-react";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 
 interface HeaderProps {
   activeTab: string;
@@ -19,6 +20,7 @@ const navItems = [
 
 export default function Header({ activeTab, onTabChange }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { data: session } = useSession();
 
   return (
     <motion.header
@@ -59,13 +61,21 @@ export default function Header({ activeTab, onTabChange }: HeaderProps) {
               whileTap={{ scale: 0.9 }}
               className="relative"
             >
-              <Image
-                src="/137442734.jpeg"
-                alt="Profile"
-                width={32}
-                height={32}
-                className="rounded-full ring-2 ring-gray-700 hover:ring-gray-500"
-              />
+              {session?.user?.image ? (
+                <Image
+                  src={session.user.image}
+                  alt={session.user.name || "Profile"}
+                  width={32}
+                  height={32}
+                  className="rounded-full ring-2 ring-gray-700 hover:ring-gray-500"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center ring-2 ring-gray-700">
+                  <span className="text-sm font-medium text-white">
+                    {session?.user?.name?.[0] || "?"}
+                  </span>
+                </div>
+              )}
             </motion.div>
 
             <motion.button
