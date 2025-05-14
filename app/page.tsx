@@ -12,27 +12,8 @@ import ReadmeViewer from "./components/ReadmeViewer";
 import ContributionsGraph from "./components/contributionsGraph";
 import ActivityFeed from "./components/activityFeed";
 import Footer from "./components/footer";
-
-const MOCK_REPOS = [
-  {
-    name: "Backend Development",
-    description: "A roadmap to learn backend development",
-    language: "Node.js",
-    languageColor: "#3178c6",
-    stars: 128,
-    forks: 23,
-    updatedAt: "2 days ago",
-  },
-  {
-    name: "System Design and DSA",
-    description: "A roadmap to learn system design and DSA",
-    language: "C++",
-    languageColor: "#f1e05a",
-    stars: 89,
-    forks: 12,
-    updatedAt: "1 week ago",
-  },
-];
+import axios from "axios";
+import { Language } from "@mui/icons-material";
 
 const MOCK_README = `# AI Roadmap Builder
 
@@ -57,14 +38,36 @@ const FILTER_BUTTONS = [
   { label: "Sort", value: "Last updated" },
 ];
 
+interface Resource {
+  title: string;
+  url: string;
+}
+
+interface RoadmapSection {
+  title: string;
+  content: string;
+  dayRange: string;
+  focusArea: string;
+  topics: string[];
+  resources: Resource[];
+  completed: boolean;
+}
+
 interface Repository {
+  _id?: string;
+  userId?: string;
   name: string;
+  title: string;
   description: string;
+  createdAt?: string;
+  updatedAt: string;
+  markdownContent?: string;
+  sections?: RoadmapSection[];
   language: string;
   languageColor: string;
   stars: number;
   forks: number;
-  updatedAt: string;
+  progress?: number; // Calculated percentage of completed sections
 }
 
 const RepositorySection = ({ repos }: { repos: Repository[] }) => {
@@ -123,11 +126,11 @@ const RepositorySection = ({ repos }: { repos: Repository[] }) => {
 
 const OverviewSection = ({ repos }: { repos: Repository[] }) => (
   <div className="space-y-8">
-    <div >   
-       <ReadmeViewer content={MOCK_README}/>
+    <div>
+      <ReadmeViewer content={MOCK_README} />
     </div>
     <ContributionsGraph />
-    
+
     <div className="mt-8">
       <h2 className="text-xl font-semibold mb-4">Popular Roadmaps</h2>
       <div className="space-y-4">
@@ -153,14 +156,94 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("overview");
   const { status } = useSession();
   const router = useRouter();
+  const [repos, setRepos] = useState<Repository[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/api/auth/signin");
+    } // Define interface for API response
+    interface ApiRepo {
+      _id?: string;
+      name: string;
+      title?: string;
+      description: string;
+      language?: string;
+      languageColor?: string;
+      stars?: number;
+      forks?: number;
+      lastUpdated?: string;
+      sections?: RoadmapSection[];
     }
+
+    // Helper function to calculate progress from sections
+    const calculateProgress = (sections?: RoadmapSection[]): number => {
+      if (!sections || sections.length === 0) return 0;
+      const completedSections = sections.filter(
+        (section) => section.completed
+      ).length;
+      return Math.round((completedSections / sections.length) * 100);
+    };
+
+    // Fetch repository data
+    const fetchRepos = async () => {
+      try {
+        const response = await axios.get("/api/markdownToJson");
+        const data: ApiRepo[] = response.data;
+        const formattedRepos = data.map((repo) => ({
+          _id: repo._id || `repo-${Math.random().toString(36).substr(2, 9)}`,
+          name: repo.name,
+          title: repo.title || repo.name,
+          description: repo.description,
+          language: repo.language || "Unknown",
+          languageColor: repo.languageColor || "#888888",
+          stars: repo.stars || 0,
+          forks: repo.forks || 0,
+          updatedAt: repo.lastUpdated || new Date().toISOString(),
+          sections: repo.sections || [],
+          progress: calculateProgress(repo.sections),
+        }));
+        setRepos(formattedRepos);
+      } catch (error) {
+        console.error("Error fetching repositories:", error);
+        // Set some default repos if API fails
+        setRepos([
+          {
+            _id: "repo-1",
+            name: "AI-Roadmap",
+            title: "AI Roadmap - Complete Learning Path",
+            description:
+              "A customizable roadmap for AI learning with comprehensive sections and resources",
+            language: "TypeScript",
+            languageColor: "#3178c6",
+            stars: 42,
+            forks: 12,
+            updatedAt: new Date().toISOString(),
+            progress: 65,
+          },
+          {
+            _id: "repo-2",
+            name: "ML-Fundamentals",
+            title: "Machine Learning Fundamentals",
+            description:
+              "Essential concepts in machine learning from beginner to advanced",
+            language: "Python",
+            languageColor: "#3572A5",
+            stars: 38,
+            forks: 8,
+            updatedAt: new Date().toISOString(),
+            progress: 30,
+          },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRepos();
   }, [status, router]);
 
-  if (status === "loading") {
+  if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-pulse text-slate-400">Loading...</div>
@@ -177,9 +260,9 @@ export default function Home() {
           <Profile />
           <div className="flex-1">
             {activeTab === "skills" ? (
-              <RepositorySection repos={MOCK_REPOS} />
+              <RepositorySection repos={repos} />
             ) : (
-              <OverviewSection repos={MOCK_REPOS} />
+              <OverviewSection repos={repos} />
             )}
           </div>
         </div>

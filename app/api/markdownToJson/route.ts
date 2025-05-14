@@ -117,7 +117,7 @@ export async function POST(req: Request) {
 }
 
 // Get all roadmaps for the current user
-export async function GET(req: Request) {
+export async function GET() {
   try {
     await connectDB();
     const session = await getServerSession(authOptions);
@@ -134,32 +134,11 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Get the URL parameter if provided
-    const { searchParams } = new URL(req.url);
-    const roadmapId = searchParams.get("id");
-
-    if (roadmapId) {
-      // Get a specific roadmap
-      const roadmap = await Roadmap.findOne({
-        _id: roadmapId,
-        userId: user._id,
-      });
-
-      if (!roadmap) {
-        return NextResponse.json(
-          { error: "Roadmap not found" },
-          { status: 404 }
-        );
-      }
-
-      return NextResponse.json(roadmap);
-    } else {
-      // Get all roadmaps
-      const roadmaps = await Roadmap.find({ userId: user._id }).sort({
-        lastUpdated: -1,
-      });
-      return NextResponse.json(roadmaps);
-    }
+    // Get all roadmaps for the user
+    const roadmaps = await Roadmap.find({ userId: user._id }).sort({
+      lastUpdated: -1,
+    });
+    return NextResponse.json(roadmaps);
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error occurred";
