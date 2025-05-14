@@ -555,174 +555,219 @@ async function generateTextGemini(prompt: string) {
 
 // Parse markdown table to extract sections
 function parseMdToSections(markdownContent: string) {
-  // This is a simplified implementation - you may need a more robust parser
-  // depending on how your markdown is structured
+  // Parse markdown table format
   const sections = [];
-  const dayRangeRegex = /#### \*\*Day (\d+)–(\d+): ([^\*]+)\*\*/g;
-  let match;
+  const tableRows = markdownContent
+    .split("\n")
+    .filter((line) => line.trim().startsWith("|"));
 
-  while ((match = dayRangeRegex.exec(markdownContent)) !== null) {
-    const dayStart = match[1];
-    const dayEnd = match[2];
-    const focusArea = match[3].trim();
-    const dayRange = `Day ${dayStart}–${dayEnd}`;
+  // Skip the header and separator rows (first two rows)
+  if (tableRows.length >= 3) {
+    for (let i = 2; i < tableRows.length; i++) {
+      const row = tableRows[i];
+      // Split the row by pipe and remove empty entries from start/end
+      const cells = row.split("|").filter((cell) => cell.trim() !== "");
 
-    // Find the content for this section until the next section or end
-    const sectionStartIndex = match.index;
-    const nextSectionMatch = dayRangeRegex.exec(markdownContent);
-    const sectionEndIndex = nextSectionMatch
-      ? nextSectionMatch.index
-      : markdownContent.length;
-    dayRangeRegex.lastIndex = match.index + 1; // Reset regex to continue from the current match
+      if (cells.length >= 4) {
+        const dayRange = cells[0].trim();
+        const focusArea = cells[1].trim();
+        const topicsContent = cells[2].trim();
+        const resourceContent = cells[3].trim();
 
-    const sectionContent = markdownContent
-      .substring(sectionStartIndex, sectionEndIndex)
-      .trim();
+        // Extract resource link
+        const resourceMatch = resourceContent.match(/\[([^\]]+)\]\(([^\)]+)\)/);
+        const resources = [];
 
-    // Extract topics and resources
-    const topicsRegex = /\*\*([^\*]+)\*\*/g;
-    const resourcesRegex = /\[([^\]]+)\]\(([^\)]+)\)/g;
-    const topics = [];
-    const resources = [];
+        if (resourceMatch) {
+          resources.push({
+            title: resourceMatch[1],
+            url: resourceMatch[2],
+          });
+        }
 
-    let topicMatch;
-    while ((topicMatch = topicsRegex.exec(sectionContent)) !== null) {
-      topics.push(topicMatch[1].trim());
+        sections.push({
+          title: `${dayRange}: ${focusArea}`,
+          content: `${focusArea}: ${topicsContent}`,
+          dayRange,
+          focusArea,
+          topics: [topicsContent],
+          resources,
+          completed: false,
+        });
+      }
     }
+  } else {
+    // Fall back to the previous implementation for non-table markdown
+    const dayRangeRegex = /#### \*\*Day (\d+)–(\d+): ([^\*]+)\*\*/g;
+    let match;
 
-    let resourceMatch;
-    while ((resourceMatch = resourcesRegex.exec(sectionContent)) !== null) {
-      resources.push({
-        title: resourceMatch[1],
-        url: resourceMatch[2],
+    while ((match = dayRangeRegex.exec(markdownContent)) !== null) {
+      const dayStart = match[1];
+      const dayEnd = match[2];
+      const focusArea = match[3].trim();
+      const dayRange = `Day ${dayStart}–${dayEnd}`;
+
+      // Find the content for this section until the next section or end
+      const sectionStartIndex = match.index;
+      const nextSectionMatch = dayRangeRegex.exec(markdownContent);
+      const sectionEndIndex = nextSectionMatch
+        ? nextSectionMatch.index
+        : markdownContent.length;
+      dayRangeRegex.lastIndex = match.index + 1; // Reset regex to continue from the current match
+
+      const sectionContent = markdownContent
+        .substring(sectionStartIndex, sectionEndIndex)
+        .trim();
+
+      // Extract topics and resources
+      const topicsRegex = /\*\*([^\*]+)\*\*/g;
+      const resourcesRegex = /\[([^\]]+)\]\(([^\)]+)\)/g;
+      const topics = [];
+      const resources = [];
+
+      let topicMatch;
+      while ((topicMatch = topicsRegex.exec(sectionContent)) !== null) {
+        topics.push(topicMatch[1].trim());
+      }
+
+      let resourceMatch;
+      while ((resourceMatch = resourcesRegex.exec(sectionContent)) !== null) {
+        resources.push({
+          title: resourceMatch[1],
+          url: resourceMatch[2],
+        });
+      }
+
+      sections.push({
+        title: `${dayRange}: ${focusArea}`,
+        content: sectionContent,
+        dayRange,
+        focusArea,
+        topics,
+        resources,
+        completed: false,
       });
     }
-
-    sections.push({
-      title: `${dayRange}: ${focusArea}`,
-      content: sectionContent,
-      dayRange,
-      focusArea,
-      topics,
-      resources,
-      completed: false,
-    });
   }
 
   return sections;
 }
 
 export async function PUT(req: Request) {
-    try {
-        console.log("Starting PUT request for roadmap generation");
-        await connectDB();
-        console.log("Database connected");
-        
-        const session = await getServerSession(authOptions);
-        console.log("Session retrieved:", session ? "Valid session" : "No session");
-        
-        if (!session || !session.user) {
-            console.log("Authentication error: No valid session");
-            return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-        }
-        
-        const user = await mongoose.models.User.findOne({
-            email: session.user.email,
-        });
-        console.log("User lookup result:", user ? "User found" : "User not found");
-        
-        if (!user) {
-            console.log("User not found for email:", session.user.email);
-            return NextResponse.json({ error: "User not found" }, { status: 404 });
-        }
-        
-        const { prompt } = await req.json();
-        console.log("Received prompt:", prompt);
+  try {
+    console.log("Starting PUT request for roadmap generation");
+    await connectDB();
+    console.log("Database connected");
 
-        if (!prompt) {
-            console.log("Error: Empty prompt received");
-            return NextResponse.json(
-                { error: "Prompt field is required" },
-                { status: 400 }
-            );
-        }
+    const session = await getServerSession(authOptions);
+    console.log("Session retrieved:", session ? "Valid session" : "No session");
 
-        console.log("Generating Gemini response for prompt validation");
-        const resp = await generateTextGemini(
-            promptText.replace("{prompt}", prompt)
-        );
-        console.log("Raw Gemini response received");
-        
-        const cleanedResponse = resp
-            .replace(/```json\n/, "")
-            .replace(/\n```\n$/, "")
-            .trim();
-        console.log("Cleaned response:", cleanedResponse);
-
-        const { error, aspirations, timeline, notes } = JSON.parse(cleanedResponse);
-        console.log("Parsed validation data:", { error, timeline, aspirations, notes });
-
-        if (error) {
-            console.log("Validation error detected:", notes);
-            return NextResponse.json(
-                { error: true, message: notes },
-                { status: 400 }
-            );
-        }
-
-        console.log("Creating roadmap prompt with timeline:", timeline);
-        const finalPrompt = promptText2
-            .replace("{timeline}", timeline)
-            .replace("{aspirations}", aspirations.join(", "));
-        console.log("Generating roadmap markdown");
-        const roadmapMarkdown = await generateTextGemini(finalPrompt);
-        console.log("Roadmap markdown generated");
-
-        // Generate a default title and description for the roadmap
-        const title = `Roadmap for ${aspirations.join(", ")}`;
-        const description = `A ${timeline} roadmap for learning ${aspirations.join(
-            ", "
-        )}`;
-        console.log("Generated title:", title);
-
-        // Use the markdownToJson functionality directly to parse the markdown
-        console.log("Parsing markdown to sections");
-        const sections = parseMdToSections(roadmapMarkdown);
-        console.log(`Parsed ${sections.length} sections from markdown`);
-
-        const roadmap = new Roadmap({
-                    userId: user._id,
-                    title,
-                    description,
-                    roadmapMarkdown,
-                    sections,
-                    versions: [
-                        {
-                            content: roadmapMarkdown,
-                            timestamp: new Date(),
-                            prompt,
-                        },
-                    ],
-                });
-        
-        console.log("Saving roadmap to database");
-        await roadmap.save();
-        console.log("Roadmap saved successfully with ID:", roadmap._id);
-
-        return NextResponse.json({
-            error: false,
-            markdown: roadmapMarkdown,
-            title: title,
-            description: description,
-            sections: sections,
-        });
-    } catch (error) {
-        console.error("Error in roadmap generation:", error);
-        const errorMessage =
-            error instanceof Error ? error.message : "Unknown error occurred";
-        return NextResponse.json(
-            { error: true, message: errorMessage },
-            { status: 500 }
-        );
+    if (!session || !session.user) {
+      console.log("Authentication error: No valid session");
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
+
+    const user = await mongoose.models.User.findOne({
+      email: session.user.email,
+    });
+    console.log("User lookup result:", user ? "User found" : "User not found");
+
+    if (!user) {
+      console.log("User not found for email:", session.user.email);
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const { prompt } = await req.json();
+    console.log("Received prompt:", prompt);
+
+    if (!prompt) {
+      console.log("Error: Empty prompt received");
+      return NextResponse.json(
+        { error: "Prompt field is required" },
+        { status: 400 }
+      );
+    }
+
+    console.log("Generating Gemini response for prompt validation");
+    const resp = await generateTextGemini(
+      promptText.replace("{prompt}", prompt)
+    );
+    console.log("Raw Gemini response received");
+
+    const cleanedResponse = resp
+      .replace(/```json\n/, "")
+      .replace(/\n```\n$/, "")
+      .trim();
+    console.log("Cleaned response:", cleanedResponse);
+
+    const { error, aspirations, timeline, notes } = JSON.parse(cleanedResponse);
+    console.log("Parsed validation data:", {
+      error,
+      timeline,
+      aspirations,
+      notes,
+    });
+
+    if (error) {
+      console.log("Validation error detected:", notes);
+      return NextResponse.json(
+        { error: true, message: notes },
+        { status: 400 }
+      );
+    }
+
+    console.log("Creating roadmap prompt with timeline:", timeline);
+    const finalPrompt = promptText2
+      .replace("{timeline}", timeline)
+      .replace("{aspirations}", aspirations.join(", "));
+    console.log("Generating roadmap markdown");
+    const roadmapMarkdown = await generateTextGemini(finalPrompt);
+    console.log("Roadmap markdown generated", roadmapMarkdown);
+
+    // Generate a default title and description for the roadmap
+    const title = `Roadmap for ${aspirations.join(", ")}`;
+    const description = `A ${timeline} roadmap for learning ${aspirations.join(
+      ", "
+    )}`;
+    console.log("Generated title:", title);
+
+    // Use the markdownToJson functionality directly to parse the markdown
+    console.log("Parsing markdown to sections");
+    const sections = parseMdToSections(roadmapMarkdown);
+    console.log(`Parsed ${sections.length} sections from markdown`);
+    const roadmap = new Roadmap({
+      userId: user._id,
+      title,
+      description,
+      markdownContent: roadmapMarkdown,
+      sections,
+      versions: [
+        {
+          content: roadmapMarkdown,
+          timestamp: new Date(),
+          prompt,
+        },
+      ],
+    });
+
+    console.log("Saving roadmap to database");
+    await roadmap.save();
+    console.log("Roadmap saved successfully with ID:", roadmap._id);
+
+    return NextResponse.json({
+      error: false,
+      markdown: roadmapMarkdown,
+      title: title,
+      description: description,
+      sections: sections,
+    });
+  } catch (error) {
+    console.error("Error in roadmap generation:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error occurred";
+    return NextResponse.json(
+      { error: true, message: errorMessage },
+      { status: 500 }
+    );
+  }
 }
