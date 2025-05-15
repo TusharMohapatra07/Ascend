@@ -59,6 +59,7 @@ export default function RoadmapPage({ params }: { params: { id: string } }) {
   >({});
   const { status } = useSession();
   const router = useRouter();
+  const roadmapId = params?.id; // Access id safely
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -66,155 +67,36 @@ export default function RoadmapPage({ params }: { params: { id: string } }) {
       return;
     }
 
+    // Skip fetch if we don't have a valid ID
+    if (!roadmapId) {
+      setLoading(false);
+      return;
+    }
     const fetchRoadmap = async () => {
       try {
-        // In a production app, you'd fetch this from an API
-        const response = await axios.get(`/api/roadmap/${params.id}`);
+        console.log("Fetching roadmap with ID:", roadmapId);
+        // Fetch from the markdownToJson endpoint with the ID parameter
+        const response = await axios.get(`/api/markdownToJson/${roadmapId}`);
+        console.log("Roadmap fetched successfully:", response.data);
         setRoadmap(response.data);
       } catch (error) {
         console.error("Error fetching roadmap:", error);
-        // Mock data for demonstration
-        setRoadmap({
-          _id: params.id,
-          userId: "user123",
-          title: "AI Development Roadmap",
-          description:
-            "Comprehensive guide to becoming an AI developer, from basics to advanced topics",
-          createdAt: new Date().toISOString(),
-          lastUpdated: new Date().toISOString(),
-          markdownContent:
-            "# AI Development Roadmap\n\nA comprehensive guide to becoming an AI developer.",
-          language: "TypeScript",
-          languageColor: "#3178c6",
-          sections: [
-            {
-              title: "Foundations of AI",
-              content:
-                "Build fundamental knowledge of AI concepts, algorithms, and mathematics behind machine learning.",
-              dayRange: "Days 1-14",
-              focusArea: "Theory",
-              topics: [
-                "Linear Algebra",
-                "Calculus",
-                "Probability",
-                "Statistics",
-              ],
-              resources: [
-                {
-                  title: "Mathematics for Machine Learning",
-                  url: "https://mml-book.github.io/",
-                },
-                {
-                  title: "AI For Everyone (Coursera)",
-                  url: "https://www.coursera.org/learn/ai-for-everyone",
-                },
-              ],
-              completed: true,
-            },
-            {
-              title: "Programming Skills",
-              content:
-                "Develop Python programming skills required for AI development, focusing on libraries and tools.",
-              dayRange: "Days 15-30",
-              focusArea: "Programming",
-              topics: ["Python", "NumPy", "Pandas", "Data Visualization"],
-              resources: [
-                {
-                  title: "Python for Data Science",
-                  url: "https://pythonfordatascience.org/",
-                },
-                { title: "NumPy Tutorials", url: "https://numpy.org/learn/" },
-              ],
-              completed: true,
-            },
-            {
-              title: "Machine Learning Basics",
-              content:
-                "Learn fundamental machine learning algorithms and techniques for data analysis.",
-              dayRange: "Days 31-60",
-              focusArea: "ML Algorithms",
-              topics: [
-                "Regression",
-                "Classification",
-                "Clustering",
-                "Model Evaluation",
-              ],
-              resources: [
-                {
-                  title: "Scikit-learn Documentation",
-                  url: "https://scikit-learn.org/",
-                },
-                {
-                  title: "Machine Learning by Andrew Ng",
-                  url: "https://www.coursera.org/learn/machine-learning",
-                },
-              ],
-              completed: false,
-            },
-            {
-              title: "Deep Learning",
-              content:
-                "Explore neural networks and deep learning frameworks for advanced AI applications.",
-              dayRange: "Days 61-90",
-              focusArea: "Neural Networks",
-              topics: [
-                "Neural Networks",
-                "Backpropagation",
-                "TensorFlow",
-                "PyTorch",
-              ],
-              resources: [
-                {
-                  title: "Deep Learning Book",
-                  url: "https://www.deeplearningbook.org/",
-                },
-                {
-                  title: "TensorFlow Tutorials",
-                  url: "https://www.tensorflow.org/tutorials",
-                },
-              ],
-              completed: false,
-            },
-            {
-              title: "Advanced AI Topics",
-              content:
-                "Study specialized AI topics including NLP, computer vision, and reinforcement learning.",
-              dayRange: "Days 91-120",
-              focusArea: "Specialized AI",
-              topics: [
-                "NLP",
-                "Computer Vision",
-                "Reinforcement Learning",
-                "GANs",
-              ],
-              resources: [
-                {
-                  title: "CS224n: Natural Language Processing",
-                  url: "https://web.stanford.edu/class/cs224n/",
-                },
-                {
-                  title: "CS231n: Convolutional Networks",
-                  url: "https://cs231n.github.io/",
-                },
-              ],
-              completed: false,
-            },
-          ],
-          versions: [
-            {
-              content: "# Initial AI Roadmap",
-              timestamp: new Date().toISOString(),
-              prompt: "Create an AI development roadmap",
-            },
-          ],
-        });
+        // In case the fetch fails, use our backup API for demo purposes
+        try {
+          console.log("Trying backup API");
+          const backupResponse = await axios.get(`/api/roadmap/${roadmapId}`);
+          console.log("Backup API successful");
+          setRoadmap(backupResponse.data);
+        } catch (backupError) {
+          console.error("Backup API also failed:", backupError);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchRoadmap();
-  }, [status, router, params.id]);
+  }, [status, router, roadmapId]);
 
   const toggleSection = (index: number) => {
     setExpandedSections((prev) => ({
@@ -222,7 +104,6 @@ export default function RoadmapPage({ params }: { params: { id: string } }) {
       [index]: !prev[index],
     }));
   };
-
   const toggleSectionCompletion = async (index: number) => {
     if (!roadmap) return;
 
@@ -230,15 +111,25 @@ export default function RoadmapPage({ params }: { params: { id: string } }) {
     updatedRoadmap.sections[index].completed =
       !updatedRoadmap.sections[index].completed;
 
-    // In a production app, you'd update this via API
+    // Update locally first for immediate UI feedback
+    setRoadmap(updatedRoadmap);
+
+    // Then update via API
     try {
-      // await axios.patch(`/api/roadmap/${roadmap._id}`, {
-      //   sectionId: index,
-      //   completed: updatedRoadmap.sections[index].completed
-      // });
-      setRoadmap(updatedRoadmap);
+      console.log(
+        `Updating section ${index} completion status to ${updatedRoadmap.sections[index].completed}`
+      );
+      await axios.patch(`/api/markdownToJson/${roadmap._id}`, {
+        sectionIndex: index,
+        completed: updatedRoadmap.sections[index].completed,
+      });
+      console.log("Update successful");
     } catch (error) {
       console.error("Error updating section status:", error);
+      // Revert the change if the API call fails
+      updatedRoadmap.sections[index].completed =
+        !updatedRoadmap.sections[index].completed;
+      setRoadmap({ ...updatedRoadmap });
     }
   };
 
