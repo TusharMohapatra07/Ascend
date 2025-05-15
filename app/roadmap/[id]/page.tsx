@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
   Circle,
-  Clock,
   BookOpen,
   ExternalLink,
   ChevronDown,
@@ -51,7 +50,15 @@ interface Roadmap {
   languageColor: string;
 }
 
-export default function RoadmapPage({ params }: { params: { id: string } }) {
+export default function RoadmapPage({
+  params,
+}: {
+  params: Promise<{ id: string }> | { id: string };
+}) {
+  // Unwrap params Promise using React.use()
+  const unwrappedParams =
+    params instanceof Promise ? React.use(params) : params;
+
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedSections, setExpandedSections] = useState<
@@ -59,7 +66,7 @@ export default function RoadmapPage({ params }: { params: { id: string } }) {
   >({});
   const { status } = useSession();
   const router = useRouter();
-  const roadmapId = params?.id; // Access id safely
+  const roadmapId = unwrappedParams?.id; // Access id from unwrapped params safely
 
   useEffect(() => {
     if (status === "unauthenticated") {
